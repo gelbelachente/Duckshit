@@ -15,7 +15,7 @@ fun main() {
 ## url handling
 
 ```
- server.register("test/{id}", listOf("GET")){
+ server.register("test/{id}/", listOf("GET")){
             //doSth
             val user : User? = it.user
             val id = it.params["id"]
