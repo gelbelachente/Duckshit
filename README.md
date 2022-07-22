@@ -126,8 +126,10 @@ ser.resolve()
 ```
   val form = ModelForm(User::class, display=listOf("*"), id=4, empty=false)  
   val htmlForm : String = form.render()
+   
   # typically used for transforming Post Parameters into a Model
-  val user = form.deserialize(map<String,String>)
+  val form2 = ModelDeserializer(User::class)
+  val user = form2.deserialize(mapOf("username" to "a","password" to "b", "id" to 898))
 ```  
 
 
