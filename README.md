@@ -20,8 +20,21 @@ fun main() {
             val user : User? = it.user
             val id = it.params["id"]
            #return Response instance
-       }
+       } 
 ```
+
+### Authentication
+
+- so far the only default available Authentication System is SessionAuthentication
+```
+ server.register("test/{id}/", listOf("GET"), listOf(SessionAuthentication(isAdmin = true)), loginUrl="/admin/auth/"){
+         //doSth
+       } 
+   ```    
+
+- You may use the public register(username,password) (to create a new user) and authenticate(username,password) (to validate user credentials) functions
+
+- Moreover, you can login an user by calling response.login(username,password) to sign him in with the standard Authentication specified in Settings.std_auth
 
 ### Response
 - There are different types of Responses
@@ -42,9 +55,10 @@ fun main() {
 ### first model
 
 - create model class
+- the OnDelete attribute specifies what should happen with the model when the Foreign Key is deleted; The default value is remove
 
 ```
-class Book(@Sql("name") var name : String, @Sql("user") var user : User,id : Int = 0) : Model(id)
+class Book(@Sql("name") var name : String, @Sql("user",onDelete=OnDelete.REMOVE) var user : User,id : Int = 0) : Model(id)
 ```
 
 - create a table in the database
@@ -131,6 +145,32 @@ ser.resolve()
   val form2 = ModelDeserializer(User::class)
   val user = form2.deserialize(mapOf("username" to "a","password" to "b", "id" to 898))
 ```  
+
+## Admin Page
+
+- callable at domain/admin/
+- Authentication with an admin account needed
+- can be used to create, delete, manipulate objects
+
+## Console Support
+
+- may be used to call commands
+
+```
+fun main(){
+   TerminalListener().listen()
+}
+```
+
+### commands:
+- ``` create-admin "username" "password" ``` to create an Admin
+
+
+## Settings
+- can be used to manipulate server mechanics
+   - page_404 : a path to the standard 404 page (html file)
+   - page_403 : a path to the standard 403 page (html file)
+
 
 
 
