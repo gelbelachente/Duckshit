@@ -1,0 +1,157 @@
+
+    data class Looper(val name : String, val list : List<*>, var active : Boolean, var body : String, var blocked : Boolean = false)
+    var loops = mutableListOf<Looper>()
+
+        private fun render(str : String, r : Render) : String{
+            var result = str
+                val sub = result.substring(r.start .. r.end)
+                when(r.type){
+                    Type.VARIABLE -> {
+                        val name = sub.removeSurrounding("%%").trim().split(".").filterNotNull()
+                       result =  result.replaceRange(r.start..(r.end), getVariable(name.first(), ctx, name.drop(1)).toString())
+                    }
+                    Type.CONDITION_START -> {
+                        val base = sub.removeSurrounding("%%").replace("if","").replace(" ","")
+                        val operators = listOf('<','>','=','!')
+                        val start = base.indexOfFirst {  operators.contains(it) }
+                        val end = base.indexOfLast { operators.contains(it) }
+                        val value = base.substring(0 until start).split(".").filterNotNull()
+                        val operator = base.substring(start..end)
+                        val value2 = base.substring(end+1 until base.length).split(".").filterNotNull()
+                        conditions.add(compare(
+                            getVariable(value.first(), ctx, value.drop(1)), operator,
+                            getVariable(value2.first(), ctx, value2.drop(1))
+                        ))
+                        result = result.replaceRange(r.start .. r.end,"")
+                    }
+                    Type.CONDITION_END -> {
+                        conditions = conditions.dropLast(1).toMutableList()
+                        result = result.replaceRange(r.start .. r.end,"")
+                    }
+                    Type.CONDITION_ELSE -> {
+                        conditions[conditions.size-1] = !conditions.last()
+                        result = result.replaceRange(r.start .. r.end,"")
+                    }
+                    Type.FOR_START -> {
+                        val base = sub.removeSurrounding("%%").replace("for","").trim()
+                        val start = base.indexOf(" in ")
+                        val end = start+3
+                        val index = base.substring(0 until start).trim()
+                        var list = base.substring(end+1 until base.length).trim()
+                        if(list.startsWith("range(")){
+                            val num = list.replace("range(","").replace(")","").trim().toInt()
+                            val loop = Looper(index, getRange(num), false, "")
+                            if(num > 1) {
+                                ctx[index] = 0
+                                loop.active = true
+                            }
+                            loops.add(loop)
+                        }else{
+                        val v =   list.split(".").filterNotNull()
+                            val value = getVariable(v.first(), ctx, v.drop(1))
+                            var iter : List<*> = listOf<Any?>()
+                            if(value is Iterable<*>) {
+                                iter = (value as Iterable<*>).toList()
+                            }
+                                val loop = Looper(index, iter,false, "")
+                            if(iter.isNotEmpty()) {
+                                ctx[index] = iter.first()!!
+                                loop.active = true
+                            }
+                            loops.add(loop)
+                            }
+                        result = result.replaceRange(r.start .. r.end,"")
+                    }
+                    Type.FOR_END -> {
+                        val lp = loops.last()
+                        var extra = ""
+                        if(lp.active){
+                            lp.blocked = true
+                            for(idx in 1 until lp.list.size){
+                                ctx[lp.name] = lp.list[idx]!!
+                                extra += transform("",0,lp.body.split("\n").filter { it.isNotBlank() })
+                            }
+                            lp.blocked = false
+                        }
+                        ctx.remove(lp.name)
+                        loops.removeLast()
+                        result = result.replaceRange(r.start .. r.end,extra)
+                    }
+                    Type.INCLUDE -> {
+                        val base = sub.removeSurrounding("%%").replace("include","").replace("'","").trim()
+                        val parent = File(base)
+                        if(!parent.exists()){
+                            error("$base can not be found to include!")
+                        }
+                        result = result.replaceRange(r.start .. r.end,parent.readText())
+                    }
+                    else -> {}
+                }
+            return result
+        }
+
+        private fun getRange(num : Int): MutableList<Int> {
+            val list = mutableListOf<Int>()
+            for (i in 0 until num ){
+                list.add(i)
+            }
+            return list
+        }
+
+         fun render() : String{
+            validateFile()
+             val c = transform()
+             return c.split("\n").filterNot { it.isBlank() }.joinToString("\n")
+        }
+
+
+        val typePipe = TypePipe()
+
+
+        fun transform(content : String = "",line : Int = 0, total : List<String> = getLines()) : String{
+            if(line >= total.size){
+                return content
+            }
+            var text = total[line]
+            var last = -1
+            var loopLast = -1
+            var conditionBlocked = conditions.any { !it } && conditions.isNotEmpty()
+            while (true){
+                val totalDif = total[line].length - text.length
+                val r = typePipe.getRenderer(text) ?:run {
+                    if(conditionBlocked  && (conditions.any { !it } && conditions.isNotEmpty())){
+                        text = text.removeRange(last+1 until text.length)
+                    }
+                    if(loops.isNotEmpty() && !loops.last().blocked) {
+                        loops.forEach { it.body += total[line].substring(loopLast + 1 until total[line].length) }
+                    }
+                    return transform(content + "\n" + text, line + 1,total)
+                }
+
+
+                conditionBlocked = conditions.any { !it } && conditions.isNotEmpty()
+                if(r.type == Type.FOR_START){
+                    loopLast = r.end-totalDif
+                }
+                    if( r.type == Type.FOR_END ) {
+                        if (loops.isNotEmpty() && !loops.last().blocked) {
+                            loops.dropLast(1).forEach { it.body += total[line].substring(loopLast + 1 until r.start) }
+                        }
+
+                    }
+               var sust = text
+               if(loops.all { it.active } || (!loops.all { it.active } && r.type == Type.FOR_END)) {
+                   sust = render(text, r)
+               }
+                val dif = text.length - sust.length
+                text =  sust
+
+
+                if(conditionBlocked  && (conditions.all { it } || conditions.isEmpty())){
+                    text = text.removeRange(last+1 until r.start)
+                }else if(!conditionBlocked && (conditions.any { !it } && conditions.isNotEmpty())){
+                    last = r.end
+                    last -= dif
+                }
+            }
+        }

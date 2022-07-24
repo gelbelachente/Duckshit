@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap');
+</style>
+<body style=" background-color: #102027; color: white; font-family: Poppins">
+
+
+    <p style="text-align: center; font-size: 150%">Debug Panel</p>
+
+    <p style="font-size: 80%; margin: 5em 5em 3em 5em; text-align: center">This panel is shown to you since you haven't deactivated the Debug option on the Duckshit-Server!</p>
+        <hr>
+    <div style="margin-left: 5em">
+        %%for p in paths%%
+        <p> %% p.path %%  <p style="color: lightgrey; margin-left: .5em"> %%p.type%% </p> </p>
+        %%endfor%%
+
+    </div>
+    <p style="text-align: center; margin-top: 5em">None of these registered paths matched %% path %% | %%type%%</p>
+
+
+</body>
+</html>

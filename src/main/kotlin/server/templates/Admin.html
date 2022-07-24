@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Duckshit Admin Panel</title>
+</head>
+
+<style>
+
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap');
+
+    .title{
+        padding: 1em 0;
+        text-align: center;
+        font-size: 150%;
+    }
+    .title-link{
+        text-decoration: none;
+        color: white;
+    }
+
+    .hero{
+        display: grid;
+        grid-template-columns: 25%;
+    }
+    .models{
+        grid-column: 1;
+        background-color: #263238;
+        border-radius: 1em;
+        margin-left: 1em;
+        padding: 1em 0;
+    }
+    .model{
+        color: #fafafa;
+        padding-left: 1em;
+        text-decoration: underline;
+    }
+    .panel{
+        background-color: #4f5b62;
+        grid-column: 2;
+        margin: 0 1em;
+        border-radius: .5em;
+        padding-bottom: 2em;
+    }
+    .model-name{
+        color: white;
+        text-align: center;
+        font-size: 115%;
+        padding-bottom: 2em;
+    }
+    .items{
+        color: white;
+        padding-left: 4em;
+        margin-bottom: 0;
+        margin-top: .4em;
+    }
+    .item-link{
+        color: white;
+        padding: 0 0;
+    }
+    .model-form{
+        background: #102027;
+        text-align: center;
+        padding: .5em .2em;
+        margin: 0 1em;
+        border-radius: 1em;
+
+    }
+    .form-field{
+        color: white;
+        border-radius: .3em;
+        background: #263238;
+        border: 1px solid #4f5b62;
+        padding: .3em;
+        margin: .5em 0;
+    }
+
+    .form-submit {
+        color: white;
+        background-color: transparent;
+        border-radius: .2em;
+        border: #4f5b62 solid 1px;
+        padding: .3em .5em;
+        margin-bottom: 1em;
+        margin-top: 2em;
+    }
+    .form-label{
+    color: white;
+        font-size: 80%;
+        margin-top: 1em;
+        margin-bottom: .2em ;
+    }
+    .model-create{
+        color: aqua;
+    }
+    .model-delete{
+        color: crimson;
+    }
+
+</style>
+
+<body style="color: white;margin: 0; padding: 0; background-color: #000a12; font-family: 'Poppins';">
+
+<p class="title"><a class="title-link" href="/admin/">Duckshit Admin Panel </a></p>
+    <div class="hero">
+    <div class="models">
+        %%for m in models%%
+            <a href="/admin/%%m%%/" class="model">%%m%%</a> <br>
+        %%endfor%%
+    </div>
+        %%if item-title != null%%
+    <div class="panel">
+        <p class="model-name">%%item-title%%      <a class="model-create" href="/admin/%%item-title%%/create/">create</a>
+        %%if model-id != null%%
+            <a class="model-delete" href="/admin/%%item-title%%/delete/%%model-id%%/">delete</a>
+        %%endif%%
+        </p>
+        %%for item in items%%
+        <p class="items"><a class="item-link" href="%%item.id%%/" >%%item%% </a></p>
+        %%endfor%%
+        %%if form != null%%
+        %%form%%
+        %%endif%%
+
+    </div>
+        %%endif%%
+    </div>
+</body>
+</html>
