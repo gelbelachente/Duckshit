@@ -2,7 +2,7 @@
 A Modern Lightweight Kotlin Web Framework
 
 ## Implementation
-- clone the github repository
+- clone the github repository / select 'Use this template'
 - start coding ( Don't touch anything inside the server folder! )
 
 ## run the server
