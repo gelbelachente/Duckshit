@@ -31,7 +31,10 @@ class ModelFormConverter(val model : KClass<out Model>, val displayFields: List<
     private fun resolveType( name : String, type : KClass<*>, v : Any?, isOptional : Boolean) : FormField {
         val value = if(empty) null else v
 
-        return  ({
+        println(name)
+        println(type)
+        println(v)
+        return  ((
             if (type.java.isAssignableFrom(String::class.java)) {
                  form.CharField(name, value?.convert()?.removeSurrounding("'"))
             } else if (type.java.isAssignableFrom(Int::class.java)) {
@@ -42,10 +45,10 @@ class ModelFormConverter(val model : KClass<out Model>, val displayFields: List<
                  form.ChoiceField(name, value?.convert(), listOf("true", "false"))
             } else if (type.java.isAssignableFrom(Number::class.java)) {
                  form.FloatField(name, value?.convert())
+            } else {
+                error("${model.java.canonicalName} is not convertable by default to html-data-type!")
             }
-
-            error("${model.java.canonicalName} is not convertable by default to html-data-type!")
-        } as FormField).apply {
+        ) as FormField).apply {
             if(!isOptional) apply("required")
         }
 

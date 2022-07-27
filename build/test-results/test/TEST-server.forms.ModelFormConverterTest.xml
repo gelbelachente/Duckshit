@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="server.forms.ModelFormConverterTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-07-27T05:20:57" hostname="DESKTOP-1J2V5VV" time="0.675">
+  <properties/>
+  <testcase name="resolveFields()" classname="server.forms.ModelFormConverterTest" time="0.675"/>
+  <system-out><![CDATA[name_xyz
+class kotlin.String
+alfa
+user
+class server.db.models.User
+Rawiwa
+Connection to SQLite JDBC Database was established
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

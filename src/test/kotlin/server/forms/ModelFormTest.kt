@@ -19,6 +19,10 @@ internal class ModelDeserializerTest {
             mf.deserialize(mapOf("username" to "123","password" to "657","id" to 234234))
             mf.deserialize(mapOf("id" to 32452345,"password" to "988fsdf","username" to "sdfsfd"))
         }
-
+        val user =
+            mf.deserialize(mapOf("id" to 32452345,"password" to "988fsdf","username" to "sdfsfd")) as User
+        assert(user.id == 32452345)
+        assert( user.password == "988fsdf")
+        assert(user.username == "sdfsfd")
     }
 }
